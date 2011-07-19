@@ -1,3 +1,7 @@
+/**
+ * Writes the kernel and bootloader to
+ * a template floppy image file.
+ */
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
