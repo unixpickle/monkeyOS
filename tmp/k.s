@@ -1,4 +1,4 @@
-org 0x2000
+org 0x1200
 ; Kernel executable code located at 3rd sector on floppy
 ; kstdio.s will be included after this file.
 
@@ -18,7 +18,7 @@ _start:
 	; printed out messages, load command line from fourth sector.
 	; TODO: load command line and start it.
 
-	mov ax, 0x300
+	mov ax, 0x140
 	mov es, ax
 	mov bx, 0 
 	
@@ -37,7 +37,7 @@ _start:
 	call kprint
 	pop ax
 	
-	jmp 0x300:0x0
+	jmp 0x140:0x0
 
 	mov ax, doneKernMsg
 	push ax

@@ -2,7 +2,7 @@
 ; kstdio.s will follow this file.
 ; shellconstants.s will follow kstdio.s
 
-org 0x3000
+org 0x1400
 section .text
 global _start
 

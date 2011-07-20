@@ -11,7 +11,7 @@ _start:
 	lea bx, [loadingMsg]
 	call print
 	
-	mov ax, 0x200
+	mov ax, 0x120
 	mov es, ax
 	mov bx, 0 
 	
@@ -28,7 +28,7 @@ _start:
 	lea bx, [startingMsg]
 	call print
 	
-	call 0x200:0x0
+	call 0x120:0x0
 
 	lea bx, [kernelExitMsg]
 	call print
