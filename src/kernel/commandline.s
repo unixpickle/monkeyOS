@@ -103,14 +103,24 @@ cmdAccept:
 	push ax
 	call kprint
 	add sp, 4
-
+	
 	mov ax, commandEnter
 	push ax
 	call kprint
 	pop ax
 
+	mov ax, 0x2002
+	mov bx, exitCmd
+	push ax
+	push bx
+	call kstrcmp
+	add sp, 4
+	cmp al, 1
+	je shell_done
+
 	jmp prompt
 
+shell_done:
 ; return from the command line... never should happen
 	mov sp, bp
 	pop bp
