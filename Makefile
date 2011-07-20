@@ -13,8 +13,8 @@ bin/kernel: src/kernel/kern.s src/kernel/constants.s src/kernel/kstdio.s
 	cat src/kernel/kern.s src/kernel/kstdio.s src/kernel/constants.s >tmp/k.s
 	nasm -f bin tmp/k.s -o bin/kernel
 
-bin/shell: src/kernel/commandline.s src/kernel/kstdio.s src/kernel/shellconstants.s
-	cat src/kernel/commandline.s src/kernel/kstdio.s src/kernel/shellconstants.s >tmp/shell.s
+bin/shell: src/kernel/commandline.s src/kernel/kstdio.s src/kernel/shellconstants.s src/kernel/kstdlib.s
+	cat src/kernel/commandline.s src/kernel/kstdio.s src/kernel/shellconstants.s src/kernel/kstdlib.s >tmp/shell.s
 	nasm -f bin tmp/shell.s -o bin/shell
 
 clean:

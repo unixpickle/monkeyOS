@@ -28,7 +28,7 @@ _start:
 	lea bx, [startingMsg]
 	call print
 	
-	call 0x120:0x0
+	jmp 0x120:0x0
 
 	lea bx, [kernelExitMsg]
 	call print

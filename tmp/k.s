@@ -26,7 +26,7 @@ _start:
 	mov dh, 0 
 	mov ch, 0 
 	mov cl, 4 ; command line is possibly two sectors long...
-	mov al, 2
+	mov al, 2 ; two sectors need to be read.
 	
 	mov ah, 2
 	
@@ -37,7 +37,7 @@ _start:
 	call kprint
 	pop ax
 	
-	jmp 0x140:0x0
+	call 0x140:0x0
 
 	mov ax, doneKernMsg
 	push ax
