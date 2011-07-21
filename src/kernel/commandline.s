@@ -1,6 +1,7 @@
 ; command line, loaded to sectors 4 and possibly 5
 ; kstdio.s will follow this file.
 ; kstdlib.s will follow kstdio.s
+; katoi.s will follow kstdlib.s
 ; shellconstants.s will follow kstdlib.s
 
 ; 0x2000 = command buffer length
@@ -13,7 +14,7 @@ global _start
 _start:
 	push bp
 	mov bp, sp
-	
+
 prompt:
 	mov ax, commandPrompt
 	push ax
@@ -96,18 +97,18 @@ cmdAccept:
 	pop ax
 
 	; print the previous command
-	mov ax, commandMsg
-	push ax
-	call kprint
-	mov ax, 0x2002
-	push ax
-	call kprint
-	add sp, 4
+	; mov ax, commandMsg
+	; push ax
+	; call kprint
+	; mov ax, 0x2002
+	; push ax
+	; call kprint
+	; add sp, 4
 	
-	mov ax, commandEnter
-	push ax
-	call kprint
-	pop ax
+	;mov ax, commandEnter
+	;push ax
+	;call kprint
+	;pop ax
 
 	mov ax, 0x2002
 	mov bx, exitCmd
@@ -117,7 +118,29 @@ cmdAccept:
 	add sp, 4
 	cmp al, 1
 	je shell_done
+	
+	; check for add character ':'
+	; or pop character ';'
+	; or operate character '/'
+	mov bx, 0x2002
+	mov al, [bx]
+	cmp al, 0x3A
+	je addOp
+	cmp al, 0x3B
+	je popOp
+	cmp al, 0x2F
+	je performOp
 
+	jmp prompt
+
+addOp:
+	call addOperation
+	jmp prompt
+popOp:
+	call popOperation
+	jmp prompt
+performOp:
+	call perfOperation
 	jmp prompt
 
 shell_done:
@@ -128,3 +151,60 @@ shell_done:
 
 	retf
 
+addOperation:
+	push bp
+	mov bp, sp
+	
+	; they have added some number to the stack
+	mov bx, 0x2003
+	push bx
+	call katoi
+	pop bx
+	push ax
+	call rpn_push
+	pop ax
+	
+	mov sp, bp
+	pop bp
+	ret
+
+popOperation:
+	push bp
+	mov bp, sp
+	sub sp, 16
+	
+	call rpn_pop
+	mov bx, sp
+	push bx
+	push ax
+	call kitoa
+	add sp, 4
+	mov bx, sp
+	push bx
+	call kprint
+	pop bx
+	add sp, 16
+	
+	mov bx, commandEnter
+	push bx
+	call kprint
+	pop bx
+	
+	mov sp, bp
+	pop bp
+	ret
+
+perfOperation:
+	push bp
+	mov bp, sp
+	
+	mov bx, 0x2003
+	mov al, [bx]
+	mov ah, 0
+	push ax
+	call rpn_operate
+	pop ax
+	
+	mov sp, bp
+	pop bp
+	ret
