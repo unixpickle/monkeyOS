@@ -51,10 +51,11 @@ kitoa_loop:
 	cmp ax, 0
 	je kitoa_endloop
 	; divide the number by 10, use the remainder for our next digit
-	mov cl, 10
-	div cl
-	mov dl, ah
-	mov ah, 0
+	mov cx, 10
+	mov dx, 0
+	div cx
+	;mov dl, ah
+	;mov ah, 0
 	mov [bx], ax
 	add dl, 0x30 ; 0x30 = '0'
 	mov bx, sp

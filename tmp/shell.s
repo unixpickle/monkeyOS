@@ -1,4 +1,4 @@
-; command line, loaded to sectors 4 and possibly 5
+; command line, loaded to sectors 4, 5, and 6
 ; kstdio.s will follow this file.
 ; kstdlib.s will follow kstdio.s
 ; katoi.s will follow kstdlib.s
@@ -118,7 +118,29 @@ cmdAccept:
 	add sp, 4
 	cmp al, 1
 	je shell_done
-	
+
+	mov ax, 0x2002
+	mov bx, clearCmd
+	push ax
+	push bx
+	call kstrcmp
+	add sp, 4
+	cmp al, 1
+	jne noClearCmd
+	call clearStack
+
+noClearCmd:
+	mov ax, 0x2002
+	mov bx, stackCmd
+	push ax
+	push bx
+	call kstrcmp
+	add sp, 4
+	cmp al, 1
+	jne noStackCmd
+	call showStack
+
+noStackCmd:
 	; check for add character ':'
 	; or pop character ';'
 	; or operate character '/'
@@ -208,6 +230,62 @@ perfOperation:
 	mov sp, bp
 	pop bp
 	ret
+
+showStack:
+	push bp
+	mov bp, sp
+	push si
+	
+	mov bx, 0x3000
+	mov ax, [bx]
+	mov si, 0x3002
+showStack_loop:
+	cmp ax, 0
+	je showStack_loopend
+
+	mov bx, [si]
+	push ax
+	sub sp, 16
+	mov ax, bx
+	mov bx, sp
+	push bx
+	push ax
+	call kitoa
+	add sp, 4
+	mov bx, sp
+	push bx
+	call kprint
+	add sp, 18
+	
+	; print newline
+	mov ax, commandEnter
+	push ax
+	call kprint
+	add sp, 2
+	
+	pop ax
+	dec ax
+	add si, 2
+	jmp showStack_loop
+	
+showStack_loopend:
+	pop si
+	mov sp, bp
+	pop bp
+	ret
+
+clearStack:
+	push bp
+	mov bp, sp
+	
+	mov ax, 0
+	mov bx, 0x3000
+	mov [bx], ax
+	
+	mov sp, bp
+	pop bp
+	ret
+
 global kprint
 kprint:
 	mov bx, sp
@@ -384,10 +462,11 @@ kitoa_loop:
 	cmp ax, 0
 	je kitoa_endloop
 	; divide the number by 10, use the remainder for our next digit
-	mov cl, 10
-	div cl
-	mov dl, ah
-	mov ah, 0
+	mov cx, 10
+	mov dx, 0
+	div cx
+	;mov dl, ah
+	;mov ah, 0
 	mov [bx], ax
 	add dl, 0x30 ; 0x30 = '0'
 	mov bx, sp
@@ -545,6 +624,12 @@ rpn_operate:
 	mov cl, [bx+4]
 	cmp cl, 0x2b
 	je rpn_operate_add
+	cmp cl, 0x2d
+	je rpn_operate_subtract
+	cmp cl, 0x2a
+	je rpn_operate_multiply
+	cmp cl, 0x2f
+	je rpn_operate_divide
 	push cx
 	call rpn_push
 	pop cx
@@ -555,6 +640,39 @@ rpn_operate_add:
 	pop cx
 	add dx, cx
 	push dx
+	call rpn_push
+	jmp rpn_operate_done
+
+rpn_operate_subtract:
+	pop dx
+	pop cx
+	sub dx, cx
+	push dx
+	call rpn_push
+	jmp rpn_operate_done
+
+rpn_operate_multiply:
+	pop ax
+	pop cx
+	mul cx
+	push ax
+	call rpn_push
+	jmp rpn_operate_done
+
+rpn_operate_divide:
+	pop ax
+	pop cx
+	mov dx, 0
+	cmp cx, 0
+	je nogood
+	div cx
+	push ax
+	call rpn_push
+	jmp rpn_operate_done
+
+nogood:
+	mov ax, 0
+	push ax
 	call rpn_push
 	jmp rpn_operate_done
 	
@@ -721,5 +839,6 @@ commandPrompt:	db '$ ',0
 commandEnter:	db 13,10,0
 commandMsg:		db 'You wrote: ',0
 exitCmd:		db 'exit',0
-testInt:		db '145',0
+stackCmd:		db 'stack',0
+clearCmd:		db 'clear',0
 

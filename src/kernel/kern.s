@@ -26,7 +26,7 @@ _start:
 	mov dh, 0 
 	mov ch, 0 
 	mov cl, 4 ; command line is possibly two sectors long...
-	mov al, 2 ; two sectors need to be read.
+	mov al, 3 ; three sectors need to be read.
 	
 	mov ah, 2
 	

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 int main (int argc, char * argv[]) {
-	char boot_buf[512*2];
+	char boot_buf[512*3];
 	bzero(boot_buf, 512);
 	if (argc != 2) {
 		fprintf(stderr, "Usage: %s <image.img>\r\n", argv[0]);
@@ -35,11 +35,11 @@ int main (int argc, char * argv[]) {
 	fread(boot_buf, 1, 512, kernel);
 	fseek(fp, 1024, SEEK_SET);
 	fwrite(boot_buf, 1, 512, fp);
-	// shell (sector 4 and 5)
-	bzero(boot_buf, 512*2);
-	fread(boot_buf, 1, 512*2, shell);
+	// shell (sector 4, 5, and 6)
+	bzero(boot_buf, 512*3);
+	fread(boot_buf, 1, 512*3, shell);
 	fseek(fp, 1536, SEEK_SET);
-	fwrite(boot_buf, 1, 512*2, fp);
+	fwrite(boot_buf, 1, 512*3, fp);
 	// close
 	fclose(kernel);
 	fclose(bsect);

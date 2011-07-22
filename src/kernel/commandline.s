@@ -1,4 +1,4 @@
-; command line, loaded to sectors 4 and possibly 5
+; command line, loaded to sectors 4, 5, and 6
 ; kstdio.s will follow this file.
 ; kstdlib.s will follow kstdio.s
 ; katoi.s will follow kstdlib.s
@@ -118,7 +118,29 @@ cmdAccept:
 	add sp, 4
 	cmp al, 1
 	je shell_done
-	
+
+	mov ax, 0x2002
+	mov bx, clearCmd
+	push ax
+	push bx
+	call kstrcmp
+	add sp, 4
+	cmp al, 1
+	jne noClearCmd
+	call clearStack
+
+noClearCmd:
+	mov ax, 0x2002
+	mov bx, stackCmd
+	push ax
+	push bx
+	call kstrcmp
+	add sp, 4
+	cmp al, 1
+	jne noStackCmd
+	call showStack
+
+noStackCmd:
 	; check for add character ':'
 	; or pop character ';'
 	; or operate character '/'
@@ -197,14 +219,70 @@ popOperation:
 perfOperation:
 	push bp
 	mov bp, sp
-	
+
 	mov bx, 0x2003
 	mov al, [bx]
 	mov ah, 0
 	push ax
 	call rpn_operate
 	pop ax
-	
+
 	mov sp, bp
 	pop bp
 	ret
+
+showStack:
+	push bp
+	mov bp, sp
+	push si
+
+	mov bx, 0x3000
+	mov ax, [bx]
+	mov si, 0x3002
+showStack_loop:
+	cmp ax, 0
+	je showStack_loopend
+
+	mov bx, [si]
+	push ax
+	sub sp, 16
+	mov ax, bx
+	mov bx, sp
+	push bx
+	push ax
+	call kitoa
+	add sp, 4
+	mov bx, sp
+	push bx
+	call kprint
+	add sp, 18
+
+	; print newline
+	mov ax, commandEnter
+	push ax
+	call kprint
+	add sp, 2
+
+	pop ax
+	dec ax
+	add si, 2
+	jmp showStack_loop
+
+showStack_loopend:
+	pop si
+	mov sp, bp
+	pop bp
+	ret
+
+clearStack:
+	push bp
+	mov bp, sp
+
+	mov ax, 0
+	mov bx, 0x3000
+	mov [bx], ax
+
+	mov sp, bp
+	pop bp
+	ret
+

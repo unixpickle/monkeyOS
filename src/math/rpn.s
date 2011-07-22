@@ -90,6 +90,12 @@ rpn_operate:
 	mov cl, [bx+4]
 	cmp cl, 0x2b
 	je rpn_operate_add
+	cmp cl, 0x2d
+	je rpn_operate_subtract
+	cmp cl, 0x2a
+	je rpn_operate_multiply
+	cmp cl, 0x2f
+	je rpn_operate_divide
 	push cx
 	call rpn_push
 	pop cx
@@ -100,6 +106,39 @@ rpn_operate_add:
 	pop cx
 	add dx, cx
 	push dx
+	call rpn_push
+	jmp rpn_operate_done
+
+rpn_operate_subtract:
+	pop dx
+	pop cx
+	sub dx, cx
+	push dx
+	call rpn_push
+	jmp rpn_operate_done
+
+rpn_operate_multiply:
+	pop ax
+	pop cx
+	mul cx
+	push ax
+	call rpn_push
+	jmp rpn_operate_done
+
+rpn_operate_divide:
+	pop ax
+	pop cx
+	mov dx, 0
+	cmp cx, 0
+	je nogood
+	div cx
+	push ax
+	call rpn_push
+	jmp rpn_operate_done
+
+nogood:
+	mov ax, 0
+	push ax
 	call rpn_push
 	jmp rpn_operate_done
 	
